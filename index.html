@@ -477,9 +477,9 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
 
 <script>
 const PLANTS = [
-  { id: "1",  emoji: "🌿", name: "Ζάμια",           sci: "Zamioculcas zamiifolia",   frequency: 30,  lastFertilized: "2026-03-01" },
+  { id: "1",  emoji: "🌿", name: "Ζάμια",           sci: "Zamioculcas zamiifolia",   frequency: 30,  lastFertilized: null },
   { id: "2",  emoji: "🍃", name: "Πόθος",            sci: "Epipremnum aureum",         frequency: 30,  lastFertilized: null },
-  { id: "3",  emoji: "🌱", name: "Μονστέρα",         sci: "Monstera deliciosa",        frequency: 15,  lastFertilized: "2026-03-20" },
+  { id: "3",  emoji: "🌱", name: "Μονστέρα",         sci: "Monstera deliciosa",        frequency: 15,  lastFertilized: null },
   { id: "4",  emoji: "🌳", name: "Φίκος Μπέντζαμιν", sci: "Ficus benjamina",           frequency: 15,  lastFertilized: null },
   { id: "5",  emoji: "🌸", name: "Γεράνι",           sci: "Pelargonium",               frequency: 30,  lastFertilized: null },
   { id: "6",  emoji: "🌴", name: "Αρέκα",            sci: "Dypsis lutescens",          frequency: 60,  lastFertilized: null },
@@ -517,6 +517,7 @@ PLANTS[14].lastFertilized = dateStr(addDays(today, -30));
 PLANTS[15].lastFertilized = dateStr(addDays(today, -10));
 
 let notionConfig = { dbId: '', proxy: '' };
+try { const _s = localStorage.getItem('notionConfig'); if (_s) notionConfig = JSON.parse(_s); } catch(e) {}
 let currentFilter = 'all';
 let searchQuery = '';
 let sortCol = 'nextFertilizer';
@@ -788,6 +789,8 @@ function updateSeasonBar() {
 }
 
 function openModal() {
+  document.getElementById('notion-db').value = notionConfig.dbId || '';
+  document.getElementById('notion-proxy').value = notionConfig.proxy || '';
   document.getElementById('settings-modal').classList.add('open');
   document.getElementById('notion-db').value = notionConfig.dbId;
   document.getElementById('notion-proxy').value = notionConfig.proxy;
@@ -810,6 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save-settings-btn').addEventListener('click', () => {
     notionConfig.dbId = document.getElementById('notion-db').value.trim();
     notionConfig.proxy = document.getElementById('notion-proxy').value.trim();
+    localStorage.setItem('notionConfig', JSON.stringify(notionConfig));
     closeModal();
     if (notionConfig.dbId && notionConfig.proxy) {
       document.getElementById('setup-banner').style.display = 'none';
