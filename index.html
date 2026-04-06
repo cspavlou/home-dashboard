@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="el" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plant Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root, [data-theme="light"] {
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-surface-2: #fbfbf9;
+  --color-surface-offset: #f3f0ec;
+  --color-surface-dynamic: #e6e4df;
+  --color-divider: #dcd9d5;
+  --color-border: #d4d1ca;
+  --color-text: #28251d;
+  --color-text-muted: #7a7974;
+  --color-text-faint: #bab9b4;
+  --color-text-inverse: #f9f8f4;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-primary-active: #0f3638;
+  --color-primary-highlight: #cedcd8;
+  --color-warning: #964219;
+  --color-warning-highlight: #f0ddd3;
+  --color-error: #a12c7b;
+  --color-success: #437a22;
+  --color-success-highlight: #d4dfcc;
+  --color-orange: #da7101;
+  --color-orange-highlight: #f5e2cc;
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --font-body: 'Inter', system-ui, sans-serif;
+  --sidebar-width: 220px;
+}
+[data-theme="dark"] {
+  --color-bg: #171614;
+  --color-surface: #1c1b19;
+  --color-surface-2: #201f1d;
+  --color-surface-offset: #1d1c1a;
+  --color-surface-dynamic: #2d2c2a;
+  --color-divider: #262523;
+  --color-border: #393836;
+  --color-text: #cdccca;
+  --color-text-muted: #797876;
+  --color-text-faint: #5a5957;
+  --color-text-inverse: #2b2a28;
+  --color-primary: #4f98a3;
+  --color-primary-hover: #227f8b;
+  --color-primary-active: #1a626b;
+  --color-primary-highlight: #313b3b;
+  --color-warning: #bb653b;
+  --color-warning-highlight: #3d2e25;
+  --color-error: #d163a7;
+  --color-success: #6daa45;
+  --color-success-highlight: #3a4435;
+  --color-orange: #fdab43;
+  --color-orange-highlight: #3d3020;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
+}
+
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+html {
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  scroll-behavior: smooth;
+}
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+a, button { transition: color var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition), opacity var(--transition); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+/* ===== LAYOUT ===== */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: 1fr;
+  height: 100dvh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  grid-row: 1 / -1;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+  gap: var(--space-2);
+  transition: width var(--transition);
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  margin-bottom: var(--space-4);
+  text-decoration: none;
+  color: var(--color-text);
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.sidebar-logo-text {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.sidebar-logo-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+.nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding: var(--space-3) var(--space-2) var(--space-1);
+  margin-top: var(--space-2);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+}
+.nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.nav-item.active {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+[data-theme="dark"] .nav-item.active { background: var(--color-primary-highlight); color: var(--color-primary); }
+.nav-item .badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #fff;
+  min-width: 18px;
+  text-align: center;
+}
+.nav-item .badge.warning { background: var(--color-warning); }
+.sidebar-spacer { flex: 1; }
+.sidebar-bottom {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== MAIN AREA ===== */
+.main-wrapper {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+.topbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-title { font-size: var(--text-base); font-weight: 700; letter-spacing: -0.01em; }
+.topbar-subtitle { font-size: var(--text-xs); color: var(--color-text-muted); margin-left: var(--space-2); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted);
+}
+.icon-btn:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.main-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* ===== NOTION SETUP BANNER ===== */
+.setup-banner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.setup-banner-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: var(--color-orange-highlight);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-orange);
+}
+.setup-banner-content { flex: 1; }
+.setup-banner-title { font-weight: 600; font-size: var(--text-sm); margin-bottom: 2px; }
+.setup-banner-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
+.setup-banner-actions { display: flex; gap: var(--space-2); flex-shrink: 0; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.btn-ghost:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.btn-sm { padding: var(--space-1) var(--space-3); font-size: var(--text-xs); }
+
+/* ===== KPI STRIP ===== */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+.kpi-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-2); }
+.kpi-value {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+.kpi-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+.kpi-card.urgent .kpi-value { color: var(--color-warning); }
+.kpi-card.ok .kpi-value { color: var(--color-success); }
+.kpi-card.dormant .kpi-value { color: var(--color-text-muted); }
+
+/* ===== SECTION HEADER ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.section-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.section-subtitle {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ===== URGENT CARDS GRID ===== */
+.urgent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+.plant-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.plant-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.plant-card.overdue { border-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-border)); }
+.plant-card.today { border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border)); }
+.plant-card-header { display: flex; align-items: center; gap: var(--space-3); }
+.plant-emoji {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  background: var(--color-surface-offset);
+  flex-shrink: 0;
+}
+.plant-name { font-weight: 700; font-size: var(--text-sm); }
+.plant-sci { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 1px; }
+.plant-status-badge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.plant-status-badge.overdue {
+  background: var(--color-warning-highlight);
+  color: var(--color-warning);
+}
+.plant-status-badge.today {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+.plant-status-badge.upcoming {
+  background: var(--color-surface-offset);
+  color: var(--color-text-muted);
+}
+.plant-meta {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.plant-meta-item { display: flex; align-items: center; gap: var(--space-1); }
+.plant-card-footer { display: flex; gap: var(--space-2); margin-top: auto; }
+.btn-done {
+  flex: 1;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: var(--space-1);
+  transition: all var(--transition);
+}
+.btn-done:hover { background: var(--color-primary-hover); }
+.btn-done.loading { opacity: 0.6; pointer-events: none; }
+.btn-done.success {
+  background: var(--color-success);
+  animation: successPop 0.3s ease;
+}
+@keyframes successPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ===== FULL TABLE ===== */
+.table-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-divider);
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  flex: 1;
+  max-width: 280px;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.search-box input {
+  border: none; background: none; outline: none;
+  color: var(--color-text);
+  font: inherit;
+  width: 100%;
+  font-size: var(--text-xs);
+}
+.search-box input::placeholder { color: var(--color-text-faint); }
+.filter-pills { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.filter-pill {
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.filter-pill:hover, .filter-pill.active {
+  background: var(--color-primary-highlight);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+thead th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+  background: var(--color-surface);
+  position: sticky; top: 0; z-index: 1;
+  cursor: pointer;
+  user-select: none;
+}
+thead th:hover { color: var(--color-text); }
+tbody tr { border-bottom: 1px solid var(--color-divider); transition: background var(--transition); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--color-surface-offset); }
+td { padding: var(--space-3) var(--space-4); color: var(--color-text); vertical-align: middle; }
+.td-plant { display: flex; align-items: center; gap: var(--space-3); }
+.td-emoji { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.td-name { font-weight: 600; }
+.td-sci { font-size: 10px; color: var(--color-text-muted); }
+.frequency-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+td .date-cell { display: flex; align-items: center; gap: var(--space-1); }
+.td-status { display: flex; align-items: center; gap: var(--space-2); }
+td .btn-table-done {
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+td .btn-table-done:hover { background: var(--color-primary); color: #fff; }
+td .btn-table-done.success { background: var(--color-success-highlight); color: var(--color-success); pointer-events: none; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: var(--space-12) var(--space-8);
+  color: var(--color-text-muted);
+}
+.empty-state-icon { width: 48px; height: 48px; margin-bottom: var(--space-4); color: var(--color-text-faint); }
+.empty-state h3 { color: var(--color-text); margin-bottom: var(--space-2); font-size: var(--text-base); }
+.empty-state p { font-size: var(--text-xs); max-width: 32ch; }
+
+/* ===== NOTION SETTINGS MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: oklch(0.1 0 0 / 0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--transition);
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-6);
+  transform: translateY(8px);
+  transition: transform var(--transition);
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
+.modal-title { font-weight: 700; font-size: var(--text-base); }
+.form-group { margin-bottom: var(--space-5); }
+.form-label { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); margin-bottom: var(--space-2); letter-spacing: 0.04em; text-transform: uppercase; }
+.form-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+.form-hint { font-size: 10px; color: var(--color-text-faint); margin-top: var(--space-1); }
+.modal-footer { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-6); }
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed; bottom: var(--space-6); right: var(--space-6);
+  z-index: 200; display: flex; flex-direction: column; gap: var(--space-2);
+  pointer-events: none;
+}
+.toast {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  display: flex; align-items: center; gap: var(--space-2);
+  box-shadow: var(--shadow-lg);
+  animation: slideInToast 0.25s ease forwards;
+  pointer-events: all;
+}
+.toast.error { background: var(--color-error); color: #fff; }
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOutToast {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-wrap { height: 4px; background: var(--color-surface-offset); border-radius: var(--radius-full); overflow: hidden; margin-top: var(--space-2); }
+.progress-bar { height: 100%; border-radius: var(--radius-full); background: var(--color-primary); transition: width 0.6s ease; }
+.progress-bar.warning { background: var(--color-warning); }
+.progress-bar.success { background: var(--color-success); }
+
+/* ===== SEASON BADGE ===== */
+.season-bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  background: var(--color-primary-highlight);
+  border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+[data-theme="dark"] .season-bar { border-color: var(--color-primary-highlight); }
+.season-bar .season-icon { font-size: 18px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .main-content { padding: var(--space-4); }
+  .urgent-grid { grid-template-columns: 1fr; }
+  .setup-banner { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .kpi-strip { grid-template-columns: 1fr 1fr; }
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .search-box { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="#">
+      <div class="sidebar-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10A10 10 0 0 1 2 12C2 6.5 6.5 2 12 2z"/>
+          <path d="M12 2c0 0-4 4-4 10s4 10 4 10"/>
+          <path d="M2 12h20"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sidebar-logo-text">Plant Tracker</div>
+        <div class="sidebar-logo-sub">Home Care</div>
+      </div>
+    </a>
+
+    <div class="nav-label">Φυτά</div>
+    <a class="nav-item active" href="#" data-view="today">
+      <i data-lucide="droplets" width="16" height="16"></i>
+      Σήμερα
+      <span class="badge urgent" id="sidebar-urgent-count">0</span>
+    </a>
+    <a class="nav-item" href="#" data-view="all">
+      <i data-lucide="list" width="16" height="16"></i>
+      Όλα τα φυτά
+    </a>
+
+    <div class="nav-label" style="margin-top: var(--space-4);">Σπίτι</div>
+    <a class="nav-item" href="#">
+      <i data-lucide="wrench" width="16" height="16"></i>
+      Επισκευές
+      <span class="badge" style="background: var(--color-text-faint);">σύντομα</span>
+    </a>
+    <a class="nav-item" href="#">
+      <i data-lucide="shopping-cart" width="16" height="16"></i>
+      Αγορές
+    </a>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-bottom">
+      <button class="nav-item" style="width:auto;" id="settings-btn">
+        <i data-lucide="settings" width="16" height="16"></i>
+        Notion API
+      </button>
+      <button class="icon-btn" id="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+        <i data-lucide="moon" width="16" height="16"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="topbar-title">Λίπανση & Φροντίδα</span>
+      <span class="topbar-subtitle" id="current-date-label"></span>
+      <div class="topbar-right">
+        <button class="icon-btn" id="refresh-btn" title="Ανανέωση από Notion">
+          <i data-lucide="refresh-cw" width="16" height="16"></i>
+        </button>
+        <button class="icon-btn" id="mobile-theme-toggle" aria-label="Toggle theme">
+          <i data-lucide="moon" width="16" height="16"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="main-content" id="main-content">
+
+      <!-- NOTION SETUP BANNER -->
+      <div class="setup-banner" id="setup-banner">
+        <div class="setup-banner-icon">
+          <i data-lucide="plug" width="20" height="20"></i>
+        </div>
+        <div class="setup-banner-content">
+          <div class="setup-banner-title">Demo Mode — Σύνδεσε το Notion σου</div>
+          <div class="setup-banner-desc">Προσθέσε το Notion API Key και το Database ID για να φορτώνονται ζωντανά τα δεδομένα σου. Τώρα βλέπεις demo δεδομένα.</div>
+        </div>
+        <div class="setup-banner-actions">
+          <button class="btn btn-primary btn-sm" id="connect-notion-btn">
+            <i data-lucide="link" width="12" height="12"></i> Σύνδεση
+          </button>
+          <button class="btn btn-ghost btn-sm" id="dismiss-banner-btn">Αργότερα</button>
+        </div>
+      </div>
+
+      <!-- SEASON BAR -->
+      <div class="season-bar" id="season-bar">
+        <span class="season-icon">🌱</span>
+        <span id="season-text">Άνοιξη — Περίοδος λίπανσης ενεργή (Μάρτιος – Οκτώβριος)</span>
+      </div>
+
+      <!-- KPI STRIP -->
+      <div class="kpi-strip">
+        <div class="kpi-card urgent">
+          <div class="kpi-label">Εκπρόθεσμα</div>
+          <div class="kpi-value" id="kpi-overdue">0</div>
+          <div class="kpi-sub">χρειάζονται λίπασμα τώρα</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Σήμερα</div>
+          <div class="kpi-value" id="kpi-today">0</div>
+          <div class="kpi-sub">για λίπανση σήμερα</div>
+        </div>
+        <div class="kpi-card ok">
+          <div class="kpi-label">Εντάξει</div>
+          <div class="kpi-value" id="kpi-ok">0</div>
+          <div class="kpi-sub">δεν χρειάζονται τίποτα</div>
+        </div>
+        <div class="kpi-card dormant">
+          <div class="kpi-label">Σύνολο</div>
+          <div class="kpi-value" id="kpi-total">0</div>
+          <div class="kpi-sub">φυτά παρακολούθησης</div>
+        </div>
+      </div>
+
+      <!-- TODAY SECTION -->
+      <section id="section-today">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🚨 Χρειάζονται λίπασμα</div>
+            <div class="section-subtitle">Εκπρόθεσμα και σημερινά</div>
+          </div>
+        </div>
+        <div class="urgent-grid" id="urgent-grid"></div>
+        <div class="empty-state" id="urgent-empty" style="display:none;">
+          <div class="empty-state-icon"><i data-lucide="check-circle" width="48" height="48"></i></div>
+          <h3>Όλα εντάξει! 🎉</h3>
+          <p>Κανένα φυτό δεν χρειάζεται λίπασμα σήμερα.</p>
+        </div>
+      </section>
+
+      <!-- ALL PLANTS TABLE -->
+      <section>
+        <div class="section-header">
+          <div>
+            <div class="section-title">Όλα τα φυτά</div>
+            <div class="section-subtitle">Πλήρες πρόγραμμα λίπανσης</div>
+          </div>
+        </div>
+        <div class="table-container">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <i data-lucide="search" width="14" height="14"></i>
+              <input type="text" id="search-input" placeholder="Αναζήτηση φυτού...">
+            </div>
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all">Όλα</button>
+              <button class="filter-pill" data-filter="overdue">Εκπρόθεσμα</button>
+              <button class="filter-pill" data-filter="soon">Σύντομα</button>
+              <button class="filter-pill" data-filter="ok">Εντάξει</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="name">ΦΥΤΟ</th>
+                  <th data-sort="lastFertilized">ΤΕΛΕΥΤΑΙΑ ΛΙΠΑΝΣΗ</th>
+                  <th data-sort="nextFertilizer">ΕΠΟΜΕΝΗ ΛΙΠΑΝΣΗ</th>
+                  <th data-sort="frequency">ΣΥΧΝΟΤΗΤΑ</th>
+                  <th>ΚΑΤΑΣΤΑΣΗ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="plants-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- NOTION SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">
+        <i data-lucide="settings" width="16" height="16" style="vertical-align:middle; margin-right:6px;"></i>
+        Σύνδεση Notion API
+      </div>
+      <button class="icon-btn" id="close-modal-btn" aria-label="Κλείσιμο">
+        <i data-lucide="x" width="16" height="16"></i>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="notion-token">Notion Internal Integration Token</label>
+      <input class="form-input" type="password" id="notion-token" placeholder="secret_xxxxxxxxxxxx" autocomplete="off">
+      <div class="form-hint">Πήγαινε στο notion.so/my-integrations → New Integration → Copy secret.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="notion-db">Database ID</label>
+      <input class="form-input" type="text" id="notion-db" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      <div class="form-hint">Άνοιξε τη βάση στο Notion → Copy link → το ID είναι το τμήμα μετά το τελευταίο /.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="notion-proxy">Vercel Proxy URL (Προαιρετικό)</label>
+      <input class="form-input" type="url" id="notion-proxy" placeholder="https://your-proxy.vercel.app/api/notion" autocomplete="off">
+      <div class="form-hint">Χωρίς proxy, τα αιτήματα γίνονται απ' ευθείας από τον browser. Για GH Pages χρειάζεται proxy λόγω CORS.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancel-modal-btn">Άκυρο</button>
+      <button class="btn btn-primary" id="save-settings-btn">
+        <i data-lucide="save" width="14" height="14"></i>
+        Αποθήκευση & Σύνδεση
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===================================================================
+// PLANT DATA — Demo data matching the Notion database
+// ===================================================================
+const PLANTS = [
+  { id: "1",  emoji: "🌿", name: "Ζάμια",           sci: "Zamioculcas zamiifolia",   frequency: 30,  lastFertilized: null },
+  { id: "2",  emoji: "🍃", name: "Πόθος",            sci: "Epipremnum aureum",         frequency: 30,  lastFertilized: null },
+  { id: "3",  emoji: "🌱", name: "Μονστέρα",         sci: "Monstera deliciosa",        frequency: 15,  lastFertilized: null },
+  { id: "4",  emoji: "🌳", name: "Φίκος Μπέντζαμιν", sci: "Ficus benjamina",           frequency: 15,  lastFertilized: null },
+  { id: "5",  emoji: "🌸", name: "Γεράνι",           sci: "Pelargonium",               frequency: 30,  lastFertilized: null },
+  { id: "6",  emoji: "🌴", name: "Αρέκα",            sci: "Dypsis lutescens",          frequency: 60,  lastFertilized: null },
+  { id: "7",  emoji: "🍀", name: "Αλοκασία",         sci: "Alocasia",                  frequency: 21,  lastFertilized: null },
+  { id: "8",  emoji: "🌿", name: "Ρυγχόσπερμα",      sci: "Rhynchospermum jasminoides",frequency: 30,  lastFertilized: null },
+  { id: "9",  emoji: "🪴", name: "Κισσός",           sci: "Hedera helix",              frequency: 30,  lastFertilized: null },
+  { id: "10", emoji: "🌼", name: "Διμορφοθήκη",      sci: "Dimorphotheca",             frequency: 30,  lastFertilized: null },
+  { id: "11", emoji: "🌺", name: "Βαμβακούλα",       sci: "Tradescantia",              frequency: 30,  lastFertilized: null },
+  { id: "12", emoji: "🌹", name: "Αμπαρόριζα",       sci: "Hesperis matronalis",       frequency: 180, lastFertilized: null },
+  { id: "13", emoji: "💎", name: "Κρασούλα",         sci: "Crassula ovata",            frequency: 60,  lastFertilized: null },
+  { id: "14", emoji: "🌿", name: "Σεφλέρα",          sci: "Schefflera",                frequency: 30,  lastFertilized: null },
+  { id: "15", emoji: "🌵", name: "Κακτάκια",         sci: "Cactaceae",                 frequency: 60,  lastFertilized: null },
+  { id: "16", emoji: "🌸", name: "Ορχιδέες",         sci: "Orchidaceae",               frequency: 15,  lastFertilized: null },
+];
+
+// Assign demo "last fertilized" dates to create interesting states
+const today = new Date(); today.setHours(0,0,0,0);
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function dateStr(d) { return d ? d.toISOString().split('T')[0] : null; }
+
+// Some overdue, some today, some upcoming
+PLANTS[0].lastFertilized  = dateStr(addDays(today, -38)); // overdue
+PLANTS[1].lastFertilized  = dateStr(addDays(today, -30)); // today
+PLANTS[2].lastFertilized  = dateStr(addDays(today, -17)); // overdue
+PLANTS[3].lastFertilized  = dateStr(addDays(today, -15)); // today
+PLANTS[4].lastFertilized  = dateStr(addDays(today, -25)); // upcoming (5 days)
+PLANTS[5].lastFertilized  = dateStr(addDays(today, -55)); // upcoming (5 days)
+PLANTS[6].lastFertilized  = dateStr(addDays(today, -14)); // upcoming (7 days)
+PLANTS[7].lastFertilized  = dateStr(addDays(today, -20)); // upcoming (10 days)
+PLANTS[8].lastFertilized  = dateStr(addDays(today, -10)); // ok
+PLANTS[9].lastFertilized  = dateStr(addDays(today, -5));  // ok
+PLANTS[10].lastFertilized = dateStr(addDays(today, -8));  // ok
+PLANTS[11].lastFertilized = dateStr(addDays(today, -60)); // ok (180 freq)
+PLANTS[12].lastFertilized = dateStr(addDays(today, -20)); // ok (60 freq)
+PLANTS[13].lastFertilized = dateStr(addDays(today, -12)); // ok
+PLANTS[14].lastFertilized = dateStr(addDays(today, -30)); // ok (60 freq)
+PLANTS[15].lastFertilized = dateStr(addDays(today, -10)); // upcoming (5 days)
+
+// In-memory state
+let notionConfig = { token: '', dbId: '', proxy: '' };
+let currentFilter = 'all';
+let searchQuery = '';
+let sortCol = 'nextFertilizer';
+let sortDir = 1;
+
+// ===================================================================
+// CORE LOGIC — mirrors the Notion formula
+// ===================================================================
+function isWinterMonth(month) {
+  return month === 11 || month === 0 || month === 1; // Dec, Jan, Feb (0-indexed)
+}
+
+function getNextFertilizer(plant) {
+  if (!plant.lastFertilized) {
+    const m = today.getMonth();
+    if (isWinterMonth(m)) {
+      const nextMarch = new Date(today.getFullYear() + (m === 11 ? 1 : 0), 2, 1);
+      return nextMarch;
+    }
+    return new Date(today);
+  }
+  const last = new Date(plant.lastFertilized);
+  const next = addDays(last, plant.frequency);
+  const m = next.getMonth();
+  if (isWinterMonth(m)) {
+    const year = m === 11 ? next.getFullYear() + 1 : next.getFullYear();
+    return new Date(year, 2, 1);
+  }
+  return next;
+}
+
+function getDaysUntil(date) {
+  const d = new Date(date); d.setHours(0,0,0,0);
+  return Math.round((d - today) / (1000 * 60 * 60 * 24));
+}
+
+function getStatus(plant) {
+  const next = getNextFertilizer(plant);
+  const days = getDaysUntil(next);
+  if (days < 0) return { label: `${Math.abs(days)}μ εκπρόθεσμο`, type: 'overdue', days };
+  if (days === 0) return { label: 'Σήμερα!', type: 'today', days };
+  if (days <= 7) return { label: `σε ${days} μέρες`, type: 'soon', days };
+  return { label: `σε ${days} μέρες`, type: 'ok', days };
+}
+
+function calcProgress(plant) {
+  if (!plant.lastFertilized) return 100;
+  const next = getNextFertilizer(plant);
+  const last = new Date(plant.lastFertilized);
+  const total = next - last;
+  const elapsed = today - last;
+  return Math.min(100, Math.round((elapsed / total) * 100));
+}
+
+// ===================================================================
+// RENDER
+// ===================================================================
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  return d.toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatDateShort(d) {
+  return d.toLocaleDateString('el-GR', { day: 'numeric', month: 'short' });
+}
+
+function updateKPIs() {
+  let overdue = 0, todayCount = 0, ok = 0;
+  PLANTS.forEach(p => {
+    const s = getStatus(p);
+    if (s.type === 'overdue') overdue++;
+    else if (s.type === 'today') todayCount++;
+    else ok++;
+  });
+  document.getElementById('kpi-overdue').textContent = overdue;
+  document.getElementById('kpi-today').textContent = todayCount;
+  document.getElementById('kpi-ok').textContent = PLANTS.length - overdue - todayCount;
+  document.getElementById('kpi-total').textContent = PLANTS.length;
+  document.getElementById('sidebar-urgent-count').textContent = overdue + todayCount;
+  if ((overdue + todayCount) === 0) document.getElementById('sidebar-urgent-count').style.display = 'none';
+  else document.getElementById('sidebar-urgent-count').style.display = '';
+}
+
+function renderUrgentCards() {
+  const grid = document.getElementById('urgent-grid');
+  const empty = document.getElementById('urgent-empty');
+  const urgent = PLANTS.filter(p => {
+    const s = getStatus(p);
+    return s.type === 'overdue' || s.type === 'today';
+  }).sort((a, b) => getDaysUntil(getNextFertilizer(a)) - getDaysUntil(getNextFertilizer(b)));
+
+  if (urgent.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = urgent.map(p => {
+    const status = getStatus(p);
+    const next = getNextFertilizer(p);
+    const progress = calcProgress(p);
+    const progressClass = status.type === 'overdue' ? 'warning' : '';
+    return `
+    <div class="plant-card ${status.type}" data-id="${p.id}">
+      <div class="plant-card-header">
+        <div class="plant-emoji">${p.emoji}</div>
+        <div>
+          <div class="plant-name">${p.name}</div>
+          <div class="plant-sci">${p.sci}</div>
+        </div>
+        <span class="plant-status-badge ${status.type}">
+          ${status.type === 'overdue' ? '<i data-lucide="alert-circle" width="10" height="10"></i>' : '<i data-lucide="droplets" width="10" height="10"></i>'}
+          ${status.label}
+        </span>
+      </div>
+      <div class="plant-meta">
+        <span class="plant-meta-item">
+          <i data-lucide="calendar" width="11" height="11"></i>
+          Τελευταία: ${p.lastFertilized ? formatDate(p.lastFertilized) : 'Ποτέ'}
+        </span>
+        <span class="plant-meta-item">
+          <i data-lucide="rotate-cw" width="11" height="11"></i>
+          Κάθε ${p.frequency} μέρες
+        </span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar ${progressClass}" style="width:${progress}%"></div>
+      </div>
+      <div class="plant-card-footer">
+        <button class="btn-done" data-id="${p.id}" onclick="markDone('${p.id}', this)">
+          <i data-lucide="check" width="12" height="12"></i>
+          Έριξα λίπασμα!
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function getFilteredSortedPlants() {
+  let list = [...PLANTS];
+  // Search
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(q) || p.sci.toLowerCase().includes(q));
+  }
+  // Filter
+  if (currentFilter !== 'all') {
+    list = list.filter(p => {
+      const s = getStatus(p);
+      if (currentFilter === 'overdue') return s.type === 'overdue';
+      if (currentFilter === 'soon') return s.type === 'today' || s.type === 'soon';
+      if (currentFilter === 'ok') return s.type === 'ok';
+      return true;
+    });
+  }
+  // Sort
+  list.sort((a, b) => {
+    let av, bv;
+    if (sortCol === 'name') { av = a.name; bv = b.name; }
+    else if (sortCol === 'frequency') { av = a.frequency; bv = b.frequency; }
+    else if (sortCol === 'lastFertilized') { av = a.lastFertilized || '9999'; bv = b.lastFertilized || '9999'; }
+    else { av = getDaysUntil(getNextFertilizer(a)); bv = getDaysUntil(getNextFertilizer(b)); }
+    return (av < bv ? -1 : av > bv ? 1 : 0) * sortDir;
+  });
+  return list;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('plants-table-body');
+  const list = getFilteredSortedPlants();
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:var(--space-8)">
+      <div class="empty-state-icon"><i data-lucide="search" width="32" height="32"></i></div>
+      <h3>Δεν βρέθηκαν φυτά</h3>
+      <p>Δοκίμασε διαφορετικό φίλτρο ή αναζήτηση.</p>
+    </div></td></tr>`;
+    lucide.createIcons(); return;
+  }
+  tbody.innerHTML = list.map(p => {
+    const status = getStatus(p);
+    const next = getNextFertilizer(p);
+    const statusColors = {
+      overdue: 'color:var(--color-warning)',
+      today: 'color:var(--color-primary)',
+      soon: 'color:var(--color-orange)',
+      ok: 'color:var(--color-success)'
+    };
+    const statusIcons = {
+      overdue: 'alert-circle',
+      today: 'droplets',
+      soon: 'clock',
+      ok: 'check-circle'
+    };
+    return `
+    <tr data-id="${p.id}">
+      <td><div class="td-plant">
+        <span class="td-emoji">${p.emoji}</span>
+        <div>
+          <div class="td-name">${p.name}</div>
+          <div class="td-sci">${p.sci}</div>
+        </div>
+      </div></td>
+      <td>${p.lastFertilized ? formatDate(p.lastFertilized) : '<span style="color:var(--color-text-faint)">—</span>'}</td>
+      <td><span style="${status.type === 'overdue' ? statusColors.overdue : ''}">${formatDate(next.toISOString().split('T')[0])}</span></td>
+      <td><span class="frequency-pill">κάθε ${p.frequency}μ</span></td>
+      <td>
+        <div class="td-status">
+          <i data-lucide="${statusIcons[status.type]}" width="13" height="13" style="${statusColors[status.type]}"></i>
+          <span style="font-size:var(--text-xs); ${statusColors[status.type]}">${status.label}</span>
+        </div>
+      </td>
+      <td>${(status.type === 'overdue' || status.type === 'today') ? `
+        <button class="btn-table-done" data-id="${p.id}" onclick="markDone('${p.id}', this, true)">
+          ✓ Done
+        </button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function renderAll() {
+  updateKPIs();
+  renderUrgentCards();
+  renderTable();
+}
+
+// ===================================================================
+// ACTIONS
+// ===================================================================
+function markDone(id, btn, isTableBtn = false) {
+  const plant = PLANTS.find(p => p.id === id);
+  if (!plant) return;
+
+  // Optimistic update
+  btn.classList.add('loading');
+  const todayStr = dateStr(today);
+
+  // If Notion is connected, call API; otherwise just update locally
+  if (notionConfig.token && notionConfig.dbId) {
+    notionUpdateLastFertilized(plant.id, todayStr)
+      .then(() => {
+        plant.lastFertilized = todayStr;
+        showToast(`✅ ${plant.name} — ενημερώθηκε στο Notion`, 'success');
+        renderAll();
+      })
+      .catch(err => {
+        btn.classList.remove('loading');
+        showToast(`❌ Σφάλμα Notion: ${err.message}`, 'error');
+      });
+  } else {
+    // Demo mode: just update locally with a small delay for feel
+    setTimeout(() => {
+      plant.lastFertilized = todayStr;
+      if (!isTableBtn) {
+        btn.classList.remove('loading');
+        btn.classList.add('success');
+        btn.innerHTML = '<i data-lucide="check" width="12" height="12"></i> Έγινε! 🎉';
+        lucide.createIcons();
+        setTimeout(() => renderAll(), 800);
+      } else {
+        renderAll();
+      }
+      showToast(`✅ ${plant.name} — λίπανση καταγράφηκε`);
+    }, 400);
+  }
+}
+
+// ===================================================================
+// NOTION API
+// ===================================================================
+async function notionUpdateLastFertilized(pageId, dateStr) {
+  const url = notionConfig.proxy
+    ? `${notionConfig.proxy}/pages/${pageId}`
+    : `https://api.notion.com/v1/pages/${pageId}`;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Notion-Version': '2022-06-28',
+  };
+  if (!notionConfig.proxy) {
+    headers['Authorization'] = `Bearer ${notionConfig.token}`;
+  } else {
+    headers['X-Notion-Token'] = notionConfig.token;
+  }
+
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify({
+      properties: {
+        'Last Fertilized': { date: { start: dateStr } }
+      }
+    })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function loadFromNotion() {
+  if (!notionConfig.token || !notionConfig.dbId) return;
+  showToast('🔄 Φόρτωση από Notion...');
+  try {
+    const url = notionConfig.proxy
+      ? `${notionConfig.proxy}/databases/${notionConfig.dbId}/query`
+      : `https://api.notion.com/v1/databases/${notionConfig.dbId}/query`;
+
+    const headers = { 'Content-Type': 'application/json', 'Notion-Version': '2022-06-28' };
+    if (!notionConfig.proxy) headers['Authorization'] = `Bearer ${notionConfig.token}`;
+    else headers['X-Notion-Token'] = notionConfig.token;
+
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify({ page_size: 100 }) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    data.results.forEach(page => {
+      const props = page.properties;
+      const name = props['Name']?.title?.[0]?.plain_text;
+      const plant = PLANTS.find(p => p.name === name);
+      if (plant) {
+        plant.lastFertilized = props['Last Fertilized']?.date?.start || null;
+        plant.frequency = props['Frequency (Days)']?.number || plant.frequency;
+        plant.id = page.id;
+      }
+    });
+    renderAll();
+    showToast('✅ Δεδομένα φορτώθηκαν από Notion!');
+  } catch (err) {
+    showToast(`❌ Σφάλμα: ${err.message}`, 'error');
+  }
+}
+
+// ===================================================================
+// TOAST
+// ===================================================================
+function showToast(msg, type = '') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = msg;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'fadeOutToast 0.3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+}
+
+// ===================================================================
+// DARK MODE
+// ===================================================================
+function initTheme() {
+  const html = document.documentElement;
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = isDark ? 'dark' : 'light';
+  html.setAttribute('data-theme', theme);
+  updateThemeIcons(theme);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  updateThemeIcons(next);
+}
+
+function updateThemeIcons(theme) {
+  const icon = theme === 'dark' ? 'sun' : 'moon';
+  ['theme-toggle', 'mobile-theme-toggle'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.innerHTML = `<i data-lucide="${icon}" width="16" height="16"></i>`;
+  });
+  lucide.createIcons();
+}
+
+// ===================================================================
+// SEASON
+// ===================================================================
+function updateSeasonBar() {
+  const m = today.getMonth(); // 0-indexed
+  const bar = document.getElementById('season-bar');
+  const text = document.getElementById('season-text');
+  if (m >= 2 && m <= 4) {
+    bar.style.background = 'var(--color-primary-highlight)';
+    text.textContent = 'Άνοιξη — Περίοδος λίπανσης ενεργή (Μάρτιος – Οκτώβριος)';
+    bar.querySelector('.season-icon').textContent = '🌱';
+  } else if (m >= 5 && m <= 7) {
+    bar.style.background = 'var(--color-success-highlight)';
+    text.textContent = 'Καλοκαίρι — Πλήρης περίοδος λίπανσης';
+    bar.querySelector('.season-icon').textContent = '☀️';
+  } else if (m >= 8 && m <= 9) {
+    bar.style.background = 'var(--color-orange-highlight)';
+    text.textContent = 'Φθινόπωρο — Τελευταίες λιπάνσεις πριν τον χειμώνα';
+    bar.querySelector('.season-icon').textContent = '🍂';
+  } else {
+    bar.style.background = 'var(--color-surface-offset)';
+    text.textContent = 'Χειμώνας — Παύση λίπανσης. Επόμενη ενεργοποίηση: 1η Μαρτίου';
+    bar.querySelector('.season-icon').textContent = '❄️';
+  }
+}
+
+// ===================================================================
+// SETTINGS MODAL
+// ===================================================================
+function openModal() {
+  document.getElementById('settings-modal').classList.add('open');
+  document.getElementById('notion-token').value = notionConfig.token;
+  document.getElementById('notion-db').value = notionConfig.dbId;
+  document.getElementById('notion-proxy').value = notionConfig.proxy;
+}
+function closeModal() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+// ===================================================================
+// EVENT LISTENERS
+// ===================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  updateSeasonBar();
+
+  // Date label
+  document.getElementById('current-date-label').textContent =
+    today.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Initial render
+  renderAll();
+
+  // Theme toggles
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+
+  // Settings
+  document.getElementById('settings-btn').addEventListener('click', openModal);
+  document.getElementById('connect-notion-btn').addEventListener('click', openModal);
+  document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+  document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+  document.getElementById('settings-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('settings-modal')) closeModal();
+  });
+  document.getElementById('save-settings-btn').addEventListener('click', () => {
+    notionConfig.token = document.getElementById('notion-token').value.trim();
+    notionConfig.dbId = document.getElementById('notion-db').value.trim();
+    notionConfig.proxy = document.getElementById('notion-proxy').value.trim();
+    closeModal();
+    if (notionConfig.token && notionConfig.dbId) {
+      document.getElementById('setup-banner').style.display = 'none';
+      loadFromNotion();
+    } else {
+      showToast('⚠️ Εισήγαγε Token και Database ID');
+    }
+  });
+
+  // Dismiss banner
+  document.getElementById('dismiss-banner-btn').addEventListener('click', () => {
+    document.getElementById('setup-banner').style.display = 'none';
+  });
+
+  // Refresh
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    if (notionConfig.token && notionConfig.dbId) loadFromNotion();
+    else showToast('ℹ️ Σύνδεσε πρώτα το Notion API');
+  });
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', e => {
+    searchQuery = e.target.value;
+    renderTable();
+  });
+
+  // Filter pills
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentFilter = pill.dataset.filter;
+      renderTable();
+    });
+  });
+
+  // Table sorting
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      if (sortCol === col) sortDir *= -1;
+      else { sortCol = col; sortDir = 1; }
+      renderTable();
+    });
+  });
+});
+</script>
+</body>
+</html>
