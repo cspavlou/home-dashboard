@@ -835,7 +835,7 @@ async function notionUpdateLastFertilized(pageId, dateStr) {
   return res.json();
 }
 
-async async function loadFromNotion() {
+async function loadFromNotion() {
   if (!notionConfig.dbId || !notionConfig.proxy) return;
   showToast('🔄 Φόρτωση από Notion...');
   try {
