@@ -920,6 +920,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   if (notionConfig.dbId && notionConfig.proxy) {
     document.getElementById('setup-banner').style.display = 'none';
+    document.getElementById('add-plant-btn').removeAttribute('disabled');
+    document.getElementById('add-plant-tooltip').removeAttribute('data-tooltip');
     loadFromNotion();
   }
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -979,12 +981,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('add-plant-modal').style.display = 'flex';
     lucide.createIcons();
-    document.getElementById('emoji-grid').addEventListener('click', function(e) {
-      var opt = e.target.closest('.emoji-option');
-      if (!opt) return;
-      selectedEmoji = opt.dataset.emoji;
-      document.querySelectorAll('.emoji-option').forEach(function(el) { el.classList.remove('selected'); });
-      opt.classList.add('selected');
+    document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
+      el.onclick = function() {
+        selectedEmoji = el.dataset.emoji;
+        document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
+        el.classList.add('selected');
+      };
     });
     document.getElementById('save-new-plant-btn').onclick = submitAddPlant;
   }
@@ -1108,12 +1110,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('edit-plant-modal').style.display = 'flex';
     lucide.createIcons();
-    document.getElementById('edit-emoji-grid').addEventListener('click', function handler(e) {
-      var opt = e.target.closest('.emoji-option');
-      if (!opt) return;
-      editingEmoji = opt.dataset.emoji;
-      document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) { el.classList.remove('selected'); });
-      opt.classList.add('selected');
+    document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
+      el.onclick = function() {
+        editingEmoji = el.dataset.emoji;
+        document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
+        el.classList.add('selected');
+      };
     });
     document.getElementById('save-edit-plant-btn').onclick = submitEditPlant;
   }
