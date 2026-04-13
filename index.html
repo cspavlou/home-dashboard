@@ -498,6 +498,10 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
         <input type="text" class="form-input" id="new-plant-name" placeholder="π.χ. Μονστέρα">
       </div>
       <div class="form-group">
+        <label class="form-label" for="new-plant-sci">Επιστημονική ονομασία <span style="color:var(--color-text-faint);font-weight:400">(προαιρετικό)</span></label>
+        <input type="text" class="form-input" id="new-plant-sci" placeholder="π.χ. Monstera deliciosa">
+      </div>
+      <div class="form-group">
         <label class="form-label" for="new-plant-freq">Συχνότητα λίπανσης (μέρες)</label>
         <input type="number" class="form-input" id="new-plant-freq" value="30" min="1" max="365">
       </div>
@@ -532,6 +536,10 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
       <div class="form-group">
         <label class="form-label" for="edit-plant-name">Όνομα φυτού</label>
         <input type="text" class="form-input" id="edit-plant-name" placeholder="π.χ. Μονστέρα">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-plant-sci">Επιστημονική ονομασία <span style="color:var(--color-text-faint);font-weight:400">(προαιρετικό)</span></label>
+        <input type="text" class="form-input" id="edit-plant-sci" placeholder="π.χ. Monstera deliciosa">
       </div>
       <div class="form-group">
         <label class="form-label" for="edit-plant-freq">Συχνότητα λίπανσης (μέρες)</label>
@@ -1048,6 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openAddPlantModal() {
     selectedEmoji = '🌿';
     document.getElementById('new-plant-name').value = '';
+    document.getElementById('new-plant-sci').value = '';
     document.getElementById('new-plant-freq').value = '30';
     document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === '🌿');
@@ -1072,6 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function submitAddPlant() {
     var name = document.getElementById('new-plant-name').value.trim();
+    var sci  = document.getElementById('new-plant-sci').value.trim();
     var freq = parseInt(document.getElementById('new-plant-freq').value) || 30;
     if (!name) { showToast('⚠️ Βάλε όνομα για το φυτό', 'error'); return; }
     var btn = document.getElementById('save-new-plant-btn');
@@ -1085,7 +1095,8 @@ document.addEventListener('DOMContentLoaded', () => {
           properties: {
             'Name': { title: [{ text: { content: name } }] },
             'Frequency (Days)': { number: freq },
-            'Emoji': { rich_text: [{ text: { content: selectedEmoji } }] }
+            'Emoji': { rich_text: [{ text: { content: selectedEmoji } }] },
+            'Scientific Name': { rich_text: [{ text: { content: sci } }] }
           }
         })
       });
@@ -1180,6 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editingPlantId = id;
     editingEmoji = plant.emoji || '🌿';
     document.getElementById('edit-plant-name').value = plant.name || '';
+    document.getElementById('edit-plant-sci').value = plant.sci || '';
     document.getElementById('edit-plant-freq').value = plant.frequency || 30;
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === editingEmoji);
@@ -1205,6 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function submitEditPlant() {
     var name = document.getElementById('edit-plant-name').value.trim();
+    var sci  = document.getElementById('edit-plant-sci').value.trim();
     var freq = parseInt(document.getElementById('edit-plant-freq').value) || 30;
     if (!name) { showToast('⚠️ Βάλε όνομα για το φυτό', 'error'); return; }
     var btn = document.getElementById('save-edit-plant-btn');
@@ -1217,13 +1230,14 @@ document.addEventListener('DOMContentLoaded', () => {
           properties: {
             'Name': { title: [{ text: { content: name } }] },
             'Frequency (Days)': { number: freq },
-            'Emoji': { rich_text: [{ text: { content: editingEmoji } }] }
+            'Emoji': { rich_text: [{ text: { content: editingEmoji } }] },
+            'Scientific Name': { rich_text: [{ text: { content: sci } }] }
           }
         })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var plant = PLANTS.find(function(p) { return p.id === editingPlantId; });
-      if (plant) { plant.name = name; plant.frequency = freq; plant.emoji = editingEmoji; }
+      if (plant) { plant.name = name; plant.sci = sci; plant.frequency = freq; plant.emoji = editingEmoji; }
       closeEditPlantModal();
       renderAll();
       showToast('✅ ' + editingEmoji + ' ' + name + ' ενημερώθηκε!');
