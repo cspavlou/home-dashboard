@@ -602,6 +602,11 @@ const PLANTS = [
 ];
 
 const today = new Date(); today.setHours(0,0,0,0);
+function parseLocalDate(s) {
+  if (!s) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
 function dateStr(d) {
   if (!d) return null;
@@ -646,7 +651,7 @@ function getNextFertilizer(plant) {
     }
     return new Date(today);
   }
-  const last = new Date(plant.lastFertilized);
+  const last = parseLocalDate(plant.lastFertilized);
   const next = addDays(last, plant.frequency);
   const m = next.getMonth();
   if (isWinterMonth(m)) {
@@ -673,7 +678,7 @@ function getStatus(plant) {
 function calcProgress(plant) {
   if (!plant.lastFertilized) return 100;
   const next = getNextFertilizer(plant);
-  const last = new Date(plant.lastFertilized);
+  const last = parseLocalDate(plant.lastFertilized);
   const total = next - last;
   const elapsed = today - last;
   return Math.min(100, Math.round((elapsed / total) * 100));
@@ -681,7 +686,8 @@ function calcProgress(plant) {
 
 function formatDate(str) {
   if (!str) return '—';
-  const d = new Date(str);
+  const d = (str instanceof Date) ? str : parseLocalDate(str);
+  if (!d) return '—';
   return d.toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
@@ -792,7 +798,7 @@ function renderTable() {
     <tr data-id="${p.id}">
       <td><div class="td-plant"><span class="td-emoji">${p.emoji}</span><div><div class="td-name">${p.name}</div><div class="td-sci">${p.sci}</div></div></div></td>
       <td>${p.lastFertilized ? formatDate(p.lastFertilized) : '<span style="color:var(--color-text-faint)">—</span>'}</td>
-      <td><span style="${status.type === 'overdue' ? statusColors.overdue : ''}">${formatDate(next.toISOString().split('T')[0])}</span></td>
+      <td><span style="${status.type === 'overdue' ? statusColors.overdue : ''}">${formatDate(next)}</span></td>
       <td><span class="frequency-pill">κάθε ${p.frequency}μ</span></td>
       <td><div class="td-status"><i data-lucide="${statusIcons[status.type]}" width="13" height="13" style="${statusColors[status.type]}"></i><span style="font-size:var(--text-xs); ${statusColors[status.type]}">${status.label}</span></div></td>
       <td>${(status.type === 'overdue' || status.type === 'today') ? `<div style="display:flex;gap:4px;align-items:center;"><button class="btn-table-done" data-id="${p.id}" onclick="markDone('${p.id}', this, true)">✓ Done</button><button class="icon-btn" onclick="openDatePicker('${p.id}', this)" aria-label="Ημερομηνία" style="width:26px;height:26px;flex-shrink:0;"><i data-lucide="calendar" width="12" height="12"></i></button></div>` : ''}<span class="tooltip-wrap" data-tooltip="${notionConfig.dbId ? 'Επεξεργασία' : 'Σύνδεσε πρώτα μια βάση Notion'}"><button class="btn-delete" onclick="openEditPlantModal('${p.id}')" aria-label="Επεξεργασία" ${notionConfig.dbId ? '' : 'disabled'} style="margin-right:2px;"><i data-lucide="pencil" width="13" height="13"></i></button></span><span class="tooltip-wrap" data-tooltip="${notionConfig.dbId ? 'Διαγραφή' : 'Σύνδεσε πρώτα μια βάση Notion'}"><button class="btn-delete" onclick="deletePlant('${p.id}')" aria-label="Διαγραφή" ${notionConfig.dbId ? '' : 'disabled'}><i data-lucide="trash-2" width="13" height="13"></i></button></span></td>
