@@ -282,6 +282,26 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
   .date-popover { position: fixed; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-lg); z-index: 300; display: flex; flex-direction: column; gap: var(--space-3); min-width: 230px; }
   .date-popover-title { font-size: var(--text-xs); font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-1); }
   .date-popover-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+  .btn-delete { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-faint); transition: color var(--transition), background var(--transition); vertical-align: middle; }
+  .btn-delete:hover { color: var(--color-error); background: var(--color-error-highlight); }
+  .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: var(--space-2); margin-top: var(--space-2); }
+  .emoji-option { font-size: 1.4rem; text-align: center; padding: var(--space-1); border-radius: var(--radius-md); cursor: pointer; border: 2px solid transparent; transition: border-color var(--transition), background var(--transition); }
+  .emoji-option:hover { background: var(--color-surface-offset); }
+  .emoji-option.selected { border-color: var(--color-primary); background: var(--color-primary-highlight); }
+  #add-plant-modal .modal-body { display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .tooltip-wrap { position: relative; display: inline-flex; }
+  .tooltip-wrap[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: var(--color-text); color: var(--color-bg);
+    font-size: var(--text-xs); white-space: nowrap;
+    padding: var(--space-1) var(--space-3); border-radius: var(--radius-md);
+    pointer-events: none; z-index: 200;
+  }
+  .btn-delete:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+  .btn.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -406,6 +426,11 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
             <div class="section-title">Όλα τα φυτά</div>
             <div class="section-subtitle">Πλήρες πρόγραμμα λίπανσης</div>
           </div>
+          <div class="tooltip-wrap" data-tooltip="Σύνδεσε πρώτα μια βάση Notion" id="add-plant-tooltip">
+            <button class="btn btn-primary btn-sm" id="add-plant-btn" onclick="openAddPlantModal()" disabled>
+              <i data-lucide="plus" width="14" height="14"></i> Νέο φυτό
+            </button>
+          </div>
         </div>
         <div class="table-container">
           <div class="table-toolbar">
@@ -438,6 +463,45 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
         </div>
       </section>
     </main>
+  </div>
+</div>
+
+<!-- ADD PLANT MODAL -->
+<div class="modal-overlay" id="add-plant-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Νέο Φυτό</div>
+      <button class="modal-close" onclick="closeAddPlantModal()"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div class="modal-body" id="add-plant-modal-body">
+      <div class="form-group">
+        <label class="form-label">Emoji</label>
+        <div class="emoji-grid" id="emoji-grid">
+          <span class="emoji-option selected" data-emoji="🌿">🌿</span><span class="emoji-option" data-emoji="🌱">🌱</span>
+          <span class="emoji-option" data-emoji="🌳">🌳</span><span class="emoji-option" data-emoji="🌸">🌸</span>
+          <span class="emoji-option" data-emoji="🌺">🌺</span><span class="emoji-option" data-emoji="🌻">🌻</span>
+          <span class="emoji-option" data-emoji="🌵">🌵</span><span class="emoji-option" data-emoji="🪴">🪴</span>
+          <span class="emoji-option" data-emoji="🍃">🍃</span><span class="emoji-option" data-emoji="🍀">🍀</span>
+          <span class="emoji-option" data-emoji="🎋">🎋</span><span class="emoji-option" data-emoji="🌴">🌴</span>
+          <span class="emoji-option" data-emoji="🌾">🌾</span><span class="emoji-option" data-emoji="💐">💐</span>
+          <span class="emoji-option" data-emoji="🌹">🌹</span><span class="emoji-option" data-emoji="🪷">🪷</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-plant-name">Όνομα φυτού</label>
+        <input type="text" class="form-input" id="new-plant-name" placeholder="π.χ. Μονστέρα">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-plant-freq">Συχνότητα λίπανσης (μέρες)</label>
+        <input type="number" class="form-input" id="new-plant-freq" value="30" min="1" max="365">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddPlantModal()">Άκυρο</button>
+      <button class="btn btn-primary" id="save-new-plant-btn">
+        <i data-lucide="plus" width="14" height="14"></i> Προσθήκη
+      </button>
+    </div>
   </div>
 </div>
 
@@ -689,7 +753,7 @@ function renderTable() {
       <td><span style="${status.type === 'overdue' ? statusColors.overdue : ''}">${formatDate(next.toISOString().split('T')[0])}</span></td>
       <td><span class="frequency-pill">κάθε ${p.frequency}μ</span></td>
       <td><div class="td-status"><i data-lucide="${statusIcons[status.type]}" width="13" height="13" style="${statusColors[status.type]}"></i><span style="font-size:var(--text-xs); ${statusColors[status.type]}">${status.label}</span></div></td>
-      <td>${(status.type === 'overdue' || status.type === 'today') ? `<div style="display:flex;gap:4px;align-items:center;"><button class="btn-table-done" data-id="${p.id}" onclick="markDone('${p.id}', this, true)">✓ Done</button><button class="icon-btn" onclick="openDatePicker('${p.id}', this)" aria-label="Ημερομηνία" style="width:26px;height:26px;flex-shrink:0;"><i data-lucide="calendar" width="12" height="12"></i></button></div>` : ''}</td>
+      <td>${(status.type === 'overdue' || status.type === 'today') ? `<div style="display:flex;gap:4px;align-items:center;"><button class="btn-table-done" data-id="${p.id}" onclick="markDone('${p.id}', this, true)">✓ Done</button><button class="icon-btn" onclick="openDatePicker('${p.id}', this)" aria-label="Ημερομηνία" style="width:26px;height:26px;flex-shrink:0;"><i data-lucide="calendar" width="12" height="12"></i></button></div>` : ''}<span class="tooltip-wrap" data-tooltip="${notionConfig.dbId ? 'Διαγραφή' : 'Σύνδεσε πρώτα μια βάση Notion'}"><button class="btn-delete" onclick="deletePlant('${p.id}')" aria-label="Διαγραφή" ${notionConfig.dbId ? '' : 'disabled'}><i data-lucide="trash-2" width="13" height="13"></i></button></span></td>
     </tr>`;
   }).join('');
   lucide.createIcons();
@@ -740,15 +804,19 @@ async function loadFromNotion() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    PLANTS.length = 0;
     data.results.forEach(page => {
       const props = page.properties;
       const name = props['Name']?.title?.[0]?.plain_text;
-      const plant = PLANTS.find(p => p.name === name);
-      if (plant) {
-        plant.lastFertilized = props['Last Fertilized']?.date?.start || null;
-        plant.frequency = props['Frequency (Days)']?.number || plant.frequency;
-        plant.id = page.id;
-      }
+      if (!name) return;
+      PLANTS.push({
+        id: page.id,
+        name: name,
+        emoji: props['Emoji']?.rich_text?.[0]?.plain_text || '🌿',
+        sci: props['Scientific Name']?.rich_text?.[0]?.plain_text || '',
+        frequency: props['Frequency (Days)']?.number || 30,
+        lastFertilized: props['Last Fertilized']?.date?.start || null,
+      });
     });
     renderAll();
     showToast('✅ Δεδομένα φορτώθηκαν από Notion!');
@@ -827,6 +895,8 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModal();
     if (notionConfig.dbId && notionConfig.proxy) {
       document.getElementById('setup-banner').style.display = 'none';
+      document.getElementById('add-plant-btn').removeAttribute('disabled');
+      document.getElementById('add-plant-tooltip').removeAttribute('data-tooltip');
       loadFromNotion();
     } else {
       showToast('⚠️ Εισήγαγε Database ID και Proxy URL');
@@ -853,6 +923,84 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+  
+
+
+  // ── Add Plant ─────────────────────────────────────────────────────────────
+  var selectedEmoji = '🌿';
+
+  function openAddPlantModal() {
+    selectedEmoji = '🌿';
+    document.getElementById('new-plant-name').value = '';
+    document.getElementById('new-plant-freq').value = '30';
+    document.querySelectorAll('.emoji-option').forEach(function(el) {
+      el.classList.toggle('selected', el.dataset.emoji === '🌿');
+    });
+    document.getElementById('add-plant-modal').style.display = 'flex';
+    lucide.createIcons();
+    document.getElementById('emoji-grid').addEventListener('click', function(e) {
+      var opt = e.target.closest('.emoji-option');
+      if (!opt) return;
+      selectedEmoji = opt.dataset.emoji;
+      document.querySelectorAll('.emoji-option').forEach(function(el) { el.classList.remove('selected'); });
+      opt.classList.add('selected');
+    });
+    document.getElementById('save-new-plant-btn').onclick = submitAddPlant;
+  }
+
+  function closeAddPlantModal() {
+    document.getElementById('add-plant-modal').style.display = 'none';
+  }
+
+  async function submitAddPlant() {
+    var name = document.getElementById('new-plant-name').value.trim();
+    var freq = parseInt(document.getElementById('new-plant-freq').value) || 30;
+    if (!name) { showToast('⚠️ Βάλε όνομα για το φυτό', 'error'); return; }
+    var btn = document.getElementById('save-new-plant-btn');
+    btn.disabled = true;
+    try {
+      var res = await fetch(notionConfig.proxy + '?path=pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parent: { database_id: notionConfig.dbId },
+          properties: {
+            'Name': { title: [{ text: { content: name } }] },
+            'Frequency (Days)': { number: freq }
+          }
+        })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      closeAddPlantModal();
+      showToast('✅ ' + selectedEmoji + ' ' + name + ' προστέθηκε!');
+      await loadFromNotion();
+    } catch(err) {
+      showToast('❌ Σφάλμα: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── Delete Plant ──────────────────────────────────────────────────────────
+  async function deletePlant(id) {
+    var plant = PLANTS.find(function(p) { return p.id === id; });
+    if (!plant) return;
+    if (!confirm('Διαγραφή "' + plant.name + '"; Η εγγραφή θα αρχειοθετηθεί στο Notion.')) return;
+    try {
+      var res = await fetch(notionConfig.proxy + '?path=pages/' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archived: true })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast('🗑️ ' + plant.name + ' διαγράφηκε.');
+      await loadFromNotion();
+    } catch(err) {
+      showToast('❌ Σφάλμα: ' + err.message, 'error');
+    }
+  }
+
+  // ── openDatePicker & confirmCustomDate ────────────────────────────────────
   function openDatePicker(id, triggerEl) {
     var existing = document.getElementById('date-popover');
     if (existing) { existing.remove(); return; }
