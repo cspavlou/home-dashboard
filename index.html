@@ -835,7 +835,7 @@ async function notionUpdateLastFertilized(pageId, dateStr) {
   return res.json();
 }
 
-async function loadFromNotion() {
+async async function loadFromNotion() {
   if (!notionConfig.dbId || !notionConfig.proxy) return;
   showToast('🔄 Φόρτωση από Notion...');
   try {
@@ -1009,7 +1009,8 @@ document.addEventListener('DOMContentLoaded', () => {
           parent: { database_id: notionConfig.dbId },
           properties: {
             'Name': { title: [{ text: { content: name } }] },
-            'Frequency (Days)': { number: freq }
+            'Frequency (Days)': { number: freq },
+            'Emoji': { rich_text: [{ text: { content: selectedEmoji } }] }
           }
         })
       });
@@ -1138,12 +1139,16 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           properties: {
             'Name': { title: [{ text: { content: name } }] },
-            'Frequency (Days)': { number: freq }
+            'Frequency (Days)': { number: freq },
+            'Emoji': { rich_text: [{ text: { content: editingEmoji } }] }
           }
         })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
+      var plant = PLANTS.find(function(p) { return p.id === editingPlantId; });
+      if (plant) { plant.name = name; plant.frequency = freq; plant.emoji = editingEmoji; }
       closeEditPlantModal();
+      renderAll();
       showToast('✅ ' + editingEmoji + ' ' + name + ' ενημερώθηκε!');
       await loadFromNotion();
     } catch(err) {
