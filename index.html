@@ -302,6 +302,15 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
   }
   .btn-delete:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   .btn.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .emoji-preview-wrap { display:flex; flex-direction:column; align-items:center; gap:var(--space-3); margin-bottom:var(--space-3); }
+  .emoji-preview-input {
+    width: 64px; height: 64px; font-size: 2rem; text-align: center; line-height: 1;
+    background: var(--color-surface-offset); border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg); cursor: text; transition: border-color var(--transition);
+    padding: 0; font-family: inherit;
+  }
+  .emoji-preview-input:focus { outline: none; border-color: var(--color-primary); background: var(--color-surface); }
 </style>
 </head>
 <body>
@@ -476,19 +485,15 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
     <div class="modal-body" id="add-plant-modal-body">
       <div class="form-group">
         <label class="form-label">Emoji</label>
+        <div class="emoji-preview-wrap">
+          <input type="text" class="emoji-preview-input" id="add-emoji-preview" maxlength="8" value="🌿" autocomplete="off" spellcheck="false">
+        </div>
         <div class="emoji-grid" id="emoji-grid">
           <span class="emoji-option selected" data-emoji="🌿">🌿</span><span class="emoji-option" data-emoji="🌱">🌱</span><span class="emoji-option" data-emoji="🌳">🌳</span><span class="emoji-option" data-emoji="🌸">🌸</span>
           <span class="emoji-option" data-emoji="🌺">🌺</span><span class="emoji-option" data-emoji="🌻">🌻</span><span class="emoji-option" data-emoji="🌵">🌵</span><span class="emoji-option" data-emoji="🪴">🪴</span>
           <span class="emoji-option" data-emoji="🍃">🍃</span><span class="emoji-option" data-emoji="🍀">🍀</span><span class="emoji-option" data-emoji="🎋">🎋</span><span class="emoji-option" data-emoji="🌴">🌴</span>
           <span class="emoji-option" data-emoji="🌾">🌾</span><span class="emoji-option" data-emoji="💐">💐</span><span class="emoji-option" data-emoji="🌹">🌹</span><span class="emoji-option" data-emoji="🪷">🪷</span>
           <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="🌡️">🌡️</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);">
-          <input type="text" class="form-input" id="add-emoji-custom"
-            placeholder="ή γράψε οποιοδήποτε emoji..."
-            maxlength="4"
-            style="font-size:1.4rem;text-align:center;width:80px;padding:var(--space-1) var(--space-2);">
-          <span style="color:var(--color-text-muted);font-size:var(--text-sm);">π.χ. 🌞 🦋 🐢</span>
         </div>
       </div>
       <div class="form-group">
@@ -519,19 +524,15 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
     <div class="modal-body" id="add-plant-modal-body">
       <div class="form-group">
         <label class="form-label">Emoji</label>
+        <div class="emoji-preview-wrap">
+          <input type="text" class="emoji-preview-input" id="edit-emoji-preview" maxlength="8" value="🌿" autocomplete="off" spellcheck="false">
+        </div>
         <div class="emoji-grid" id="edit-emoji-grid">
           <span class="emoji-option" data-emoji="🌿">🌿</span><span class="emoji-option" data-emoji="🌱">🌱</span><span class="emoji-option" data-emoji="🌳">🌳</span><span class="emoji-option" data-emoji="🌸">🌸</span>
           <span class="emoji-option" data-emoji="🌺">🌺</span><span class="emoji-option" data-emoji="🌻">🌻</span><span class="emoji-option" data-emoji="🌵">🌵</span><span class="emoji-option" data-emoji="🪴">🪴</span>
           <span class="emoji-option" data-emoji="🍃">🍃</span><span class="emoji-option" data-emoji="🍀">🍀</span><span class="emoji-option" data-emoji="🎋">🎋</span><span class="emoji-option" data-emoji="🌴">🌴</span>
           <span class="emoji-option" data-emoji="🌾">🌾</span><span class="emoji-option" data-emoji="💐">💐</span><span class="emoji-option" data-emoji="🌹">🌹</span><span class="emoji-option" data-emoji="🪷">🪷</span>
           <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="🌡️">🌡️</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);">
-          <input type="text" class="form-input" id="edit-emoji-custom"
-            placeholder="ή γράψε οποιοδήποτε emoji..."
-            maxlength="4"
-            style="font-size:1.4rem;text-align:center;width:80px;padding:var(--space-1) var(--space-2);">
-          <span style="color:var(--color-text-muted);font-size:var(--text-sm);">π.χ. 🌞 🦋 🐢</span>
         </div>
       </div>
       <div class="form-group">
@@ -982,7 +983,8 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedEmoji = '🌿';
     document.getElementById('new-plant-name').value = '';
     document.getElementById('new-plant-freq').value = '30';
-    document.querySelectorAll('.emoji-option').forEach(function(el) {
+    document.getElementById('add-emoji-preview').value = '🌿';
+    document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === '🌿');
     });
     document.getElementById('add-plant-modal').classList.add('open');
@@ -990,13 +992,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
         selectedEmoji = el.dataset.emoji;
-        document.getElementById('add-emoji-custom').value = '';
+        document.getElementById('add-emoji-preview').value = selectedEmoji;
         document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
         el.classList.add('selected');
       };
     });
-    document.getElementById('add-emoji-custom').value = '';
-    document.getElementById('add-emoji-custom').oninput = function() {
+    var previewAdd = document.getElementById('add-emoji-preview');
+    previewAdd.oninput = function() {
       var val = this.value.trim();
       if (val) {
         selectedEmoji = val;
@@ -1121,6 +1123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editingEmoji = plant.emoji || '🌿';
     document.getElementById('edit-plant-name').value = plant.name || '';
     document.getElementById('edit-plant-freq').value = plant.frequency || 30;
+    document.getElementById('edit-emoji-preview').value = editingEmoji;
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === editingEmoji);
     });
@@ -1129,14 +1132,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
         editingEmoji = el.dataset.emoji;
-        document.getElementById('edit-emoji-custom').value = '';
+        document.getElementById('edit-emoji-preview').value = editingEmoji;
         document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
         el.classList.add('selected');
       };
     });
-    var customInput = document.getElementById('edit-emoji-custom');
-    customInput.value = '';
-    customInput.oninput = function() {
+    var previewEdit = document.getElementById('edit-emoji-preview');
+    previewEdit.oninput = function() {
       var val = this.value.trim();
       if (val) {
         editingEmoji = val;
