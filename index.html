@@ -506,7 +506,7 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
 </div>
 
 <!-- EDIT PLANT MODAL -->
-<div class="modal-overlay" id="edit-plant-modal" style="display:none;">
+<div class="modal-overlay" id="edit-plant-modal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Επεξεργασία Φυτού</div>
@@ -979,7 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === '🌿');
     });
-    document.getElementById('add-plant-modal').style.display = 'flex';
+    document.getElementById('add-plant-modal').classList.add('open');
     lucide.createIcons();
     document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
@@ -992,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeAddPlantModal() {
-    document.getElementById('add-plant-modal').style.display = 'none';
+    document.getElementById('add-plant-modal').classList.remove('open');
   }
 
   async function submitAddPlant() {
@@ -1108,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === editingEmoji);
     });
-    document.getElementById('edit-plant-modal').style.display = 'flex';
+    document.getElementById('edit-plant-modal').classList.add('open');
     lucide.createIcons();
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
@@ -1121,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeEditPlantModal() {
-    document.getElementById('edit-plant-modal').style.display = 'none';
+    document.getElementById('edit-plant-modal').classList.remove('open');
     editingPlantId = null;
   }
 
