@@ -303,14 +303,14 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
   .btn-delete:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   .btn.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .emoji-preview-wrap { display:flex; flex-direction:column; align-items:center; gap:var(--space-3); margin-bottom:var(--space-3); }
-  .emoji-preview-input {
-    width: 64px; height: 64px; font-size: 2rem; text-align: center; line-height: 1;
-    background: var(--color-surface-offset); border: 2px solid var(--color-border);
-    border-radius: var(--radius-lg); cursor: text; transition: border-color var(--transition);
-    padding: 0; font-family: inherit;
+  .emoji-option-custom { cursor:pointer; color: var(--color-text-faint); font-size:1rem; display:inline-flex; align-items:center; justify-content:center; }
+  .emoji-option-custom:hover { color: var(--color-text); background: var(--color-surface-offset-2); }
+  .emoji-custom-input {
+    font-size: 1.2rem; text-align: center; width: 100%; height: 100%;
+    background: var(--color-surface); border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md); padding: 0; font-family: inherit;
+    outline: none; cursor: text;
   }
-  .emoji-preview-input:focus { outline: none; border-color: var(--color-primary); background: var(--color-surface); }
 </style>
 </head>
 <body>
@@ -485,16 +485,13 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
     <div class="modal-body" id="add-plant-modal-body">
       <div class="form-group">
         <label class="form-label">Emoji</label>
-        <div class="emoji-preview-wrap">
-          <input type="text" class="emoji-preview-input" id="add-emoji-preview" maxlength="8" value="🌿" autocomplete="off" spellcheck="false">
-        </div>
         <div class="emoji-grid" id="emoji-grid">
           <span class="emoji-option selected" data-emoji="🌿">🌿</span><span class="emoji-option" data-emoji="🌱">🌱</span><span class="emoji-option" data-emoji="🌳">🌳</span><span class="emoji-option" data-emoji="🌸">🌸</span>
           <span class="emoji-option" data-emoji="🌺">🌺</span><span class="emoji-option" data-emoji="🌻">🌻</span><span class="emoji-option" data-emoji="🌵">🌵</span><span class="emoji-option" data-emoji="🪴">🪴</span>
           <span class="emoji-option" data-emoji="🍃">🍃</span><span class="emoji-option" data-emoji="🍀">🍀</span><span class="emoji-option" data-emoji="🎋">🎋</span><span class="emoji-option" data-emoji="🌴">🌴</span>
           <span class="emoji-option" data-emoji="🌾">🌾</span><span class="emoji-option" data-emoji="💐">💐</span><span class="emoji-option" data-emoji="🌹">🌹</span><span class="emoji-option" data-emoji="🪷">🪷</span>
-          <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="🌡️">🌡️</span>
-        </div>
+          <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="💮">💮</span><span class="emoji-option" data-emoji="🏵️">🏵️</span><span class="emoji-option" data-emoji="🌷">🌷</span><span class="emoji-option" data-emoji="🪻">🪻</span>
+        <span class="emoji-option emoji-option-custom" id="emoji-grid-custom-tile" title="Άλλο emoji">✏️</span></div>
       </div>
       <div class="form-group">
         <label class="form-label" for="new-plant-name">Όνομα φυτού</label>
@@ -524,16 +521,13 @@ td .btn-table-done.success { background: var(--color-success-highlight); color: 
     <div class="modal-body" id="add-plant-modal-body">
       <div class="form-group">
         <label class="form-label">Emoji</label>
-        <div class="emoji-preview-wrap">
-          <input type="text" class="emoji-preview-input" id="edit-emoji-preview" maxlength="8" value="🌿" autocomplete="off" spellcheck="false">
-        </div>
         <div class="emoji-grid" id="edit-emoji-grid">
           <span class="emoji-option" data-emoji="🌿">🌿</span><span class="emoji-option" data-emoji="🌱">🌱</span><span class="emoji-option" data-emoji="🌳">🌳</span><span class="emoji-option" data-emoji="🌸">🌸</span>
           <span class="emoji-option" data-emoji="🌺">🌺</span><span class="emoji-option" data-emoji="🌻">🌻</span><span class="emoji-option" data-emoji="🌵">🌵</span><span class="emoji-option" data-emoji="🪴">🪴</span>
           <span class="emoji-option" data-emoji="🍃">🍃</span><span class="emoji-option" data-emoji="🍀">🍀</span><span class="emoji-option" data-emoji="🎋">🎋</span><span class="emoji-option" data-emoji="🌴">🌴</span>
           <span class="emoji-option" data-emoji="🌾">🌾</span><span class="emoji-option" data-emoji="💐">💐</span><span class="emoji-option" data-emoji="🌹">🌹</span><span class="emoji-option" data-emoji="🪷">🪷</span>
-          <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="🌡️">🌡️</span>
-        </div>
+          <span class="emoji-option" data-emoji="🌼">🌼</span><span class="emoji-option" data-emoji="🌲">🌲</span><span class="emoji-option" data-emoji="💎">💎</span><span class="emoji-option" data-emoji="💮">💮</span><span class="emoji-option" data-emoji="🏵️">🏵️</span><span class="emoji-option" data-emoji="🌷">🌷</span><span class="emoji-option" data-emoji="🪻">🪻</span>
+        <span class="emoji-option emoji-option-custom" id="edit-emoji-grid-custom-tile" title="Άλλο emoji">✏️</span></div>
       </div>
       <div class="form-group">
         <label class="form-label" for="edit-plant-name">Όνομα φυτού</label>
@@ -921,6 +915,12 @@ function closeModal() { document.getElementById('settings-modal').classList.remo
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  // Close any modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
   updateSeasonBar();
   document.getElementById('current-date-label').textContent =
     today.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -979,11 +979,70 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Add Plant ─────────────────────────────────────────────────────────────
   var selectedEmoji = '🌿';
 
+  
+
+  function initCustomTile(gridId, getEmoji, setEmoji) {
+    var tile = document.getElementById(gridId + '-custom-tile');
+    if (!tile) return;
+    tile.onclick = function(e) {
+      e.stopPropagation();
+      // Replace tile content with a small input
+      tile.innerHTML = '';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'emoji-custom-input';
+      inp.maxLength = 8;
+      inp.setAttribute('autocomplete','off');
+      inp.setAttribute('spellcheck','false');
+      tile.appendChild(inp);
+      inp.focus();
+      // On input: update selection, deselect grid
+      inp.oninput = function() {
+        var val = inp.value.trim();
+        if (val) {
+          setEmoji(val);
+          document.querySelectorAll('#' + gridId + ' .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
+        }
+      };
+      // On blur or Enter: restore tile if empty
+      function restoreTile() {
+        if (!inp.value.trim()) {
+          tile.innerHTML = '✏️';
+          tile.onclick = arguments.callee; // re-attach — re-init instead
+          initCustomTile(gridId, getEmoji, setEmoji);
+        }
+      }
+      inp.addEventListener('blur', restoreTile);
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { inp.blur(); e.preventDefault(); }
+        if (e.key === 'Escape') { inp.value = ''; inp.blur(); }
+      });
+    };
+  }
+
+  function initEmojiGridKeyboard(gridId, onSelect) {
+    var opts = Array.from(document.querySelectorAll('#' + gridId + ' .emoji-option'));
+    var COLS = 8;
+    opts.forEach(function(opt, idx) {
+      opt.setAttribute('tabindex', '0');
+      opt.setAttribute('role', 'radio');
+      opt.setAttribute('aria-label', opt.dataset.emoji);
+      opt.addEventListener('keydown', function(e) {
+        var next = -1;
+        if      (e.key === 'ArrowRight') next = idx + 1;
+        else if (e.key === 'ArrowLeft')  next = idx - 1;
+        else if (e.key === 'ArrowDown')  next = idx + COLS;
+        else if (e.key === 'ArrowUp')    next = idx - COLS;
+        else if (e.key === 'Enter' || e.key === ' ') { opt.click(); e.preventDefault(); return; }
+        if (next >= 0 && next < opts.length) { opts[next].focus(); e.preventDefault(); }
+      });
+    });
+  }
+
   function openAddPlantModal() {
     selectedEmoji = '🌿';
     document.getElementById('new-plant-name').value = '';
     document.getElementById('new-plant-freq').value = '30';
-    document.getElementById('add-emoji-preview').value = '🌿';
     document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === '🌿');
     });
@@ -992,19 +1051,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
         selectedEmoji = el.dataset.emoji;
-        document.getElementById('add-emoji-preview').value = selectedEmoji;
         document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
         el.classList.add('selected');
       };
     });
-    var previewAdd = document.getElementById('add-emoji-preview');
-    previewAdd.oninput = function() {
-      var val = this.value.trim();
-      if (val) {
-        selectedEmoji = val;
-        document.querySelectorAll('#emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
-      }
-    };
+    initEmojiGridKeyboard('emoji-grid');
+    initCustomTile('emoji-grid', function(){ return selectedEmoji; }, function(v){ selectedEmoji = v; });
     document.getElementById('save-new-plant-btn').onclick = submitAddPlant;
   }
 
@@ -1123,7 +1175,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editingEmoji = plant.emoji || '🌿';
     document.getElementById('edit-plant-name').value = plant.name || '';
     document.getElementById('edit-plant-freq').value = plant.frequency || 30;
-    document.getElementById('edit-emoji-preview').value = editingEmoji;
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.classList.toggle('selected', el.dataset.emoji === editingEmoji);
     });
@@ -1132,19 +1183,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(el) {
       el.onclick = function() {
         editingEmoji = el.dataset.emoji;
-        document.getElementById('edit-emoji-preview').value = editingEmoji;
-        document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
+            document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
         el.classList.add('selected');
       };
     });
-    var previewEdit = document.getElementById('edit-emoji-preview');
-    previewEdit.oninput = function() {
-      var val = this.value.trim();
-      if (val) {
-        editingEmoji = val;
-        document.querySelectorAll('#edit-emoji-grid .emoji-option').forEach(function(o) { o.classList.remove('selected'); });
-      }
-    };
+    initEmojiGridKeyboard('edit-emoji-grid');
+    initCustomTile('edit-emoji-grid', function(){ return editingEmoji; }, function(v){ editingEmoji = v; });
     document.getElementById('save-edit-plant-btn').onclick = submitEditPlant;
   }
 
