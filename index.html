@@ -497,7 +497,13 @@ const PLANTS = [
 
 const today = new Date(); today.setHours(0,0,0,0);
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
-function dateStr(d) { return d ? d.toISOString().split('T')[0] : null; }
+function dateStr(d) {
+  if (!d) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
 
 PLANTS[0].lastFertilized  = dateStr(addDays(today, -38));
 PLANTS[1].lastFertilized  = dateStr(addDays(today, -30));
